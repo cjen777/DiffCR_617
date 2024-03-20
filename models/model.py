@@ -60,6 +60,8 @@ class Palette(BaseModel):
         ''' must use set_device in tensor '''
         self.cond_image = self.set_device(data.get('cond_image'))
         self.gt_image = self.set_device(data.get('gt_image'))
+        ##TODO: Convert to latent
+
         self.mask = self.set_device(data.get('mask'))
         self.mask_image = data.get('mask_image')
         self.path = data['path']
@@ -118,7 +120,16 @@ class Palette(BaseModel):
         self.netG.train()
         self.train_metrics.reset()
         for train_data in tqdm.tqdm(self.phase_loader):
+            # print(self.phase_loader) ## cjen
+            # raise Exception
             self.set_input(train_data)
+            print(self.cond_image.shape)
+            print(self.gt_image.shape)
+            
+            raise Exception
+            # print(self.mask, self.mask_image)
+            # print(self.mask.shape, self.mask_image.shape)
+            # raise Exception
             self.optG.zero_grad()
             loss = self.netG(self.gt_image, self.cond_image, mask=self.mask)
             loss.backward()

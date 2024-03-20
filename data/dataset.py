@@ -84,6 +84,7 @@ class Sen2_MTC_New_Multi(data.Dataset):
         self.index = 0
 
     def __getitem__(self, index):
+        # raise Exception
         cloud_image_path0, cloud_image_path1, cloud_image_path2 = self.filepair[
             index][0], self.filepair[index][1], self.filepair[index][2]
         cloudless_image_path = self.filepair[index][3]
@@ -94,6 +95,8 @@ class Sen2_MTC_New_Multi(data.Dataset):
         image_cloudless = self.image_read(cloudless_image_path)
 
         # return [image_cloud0, image_cloud1, image_cloud2], image_cloudless, self.image_name[index]
+         
+        ## MARKER : Gt Image / Cond Image should be latent vectors
         ret = {}
         ret['gt_image'] = image_cloudless[:3, :, :]
         ret['cond_image'] = torch.cat([image_cloud0[:3, :, :], image_cloud1[:3, :, :], image_cloud2[:3, :, :]])
@@ -180,7 +183,7 @@ class Sen2_MTC_New(data.Dataset):
         cloud_image_path0, cloud_image_path1, cloud_image_path2 = self.filepair[
             index][0], self.filepair[index][1], self.filepair[index][2]
         cloudless_image_path = self.filepair[index][3]
-
+        print('cjen')
         image_cloud0 = self.image_read(cloud_image_path0)
         image_cloud1 = self.image_read(cloud_image_path1)
         image_cloud2 = self.image_read(cloud_image_path2)
@@ -200,6 +203,7 @@ class Sen2_MTC_New(data.Dataset):
         return len(self.filepair)
 
     def image_read(self, image_path):
+        raise Exception
         img = tiff.imread(image_path)
         img = (img / 1.0).transpose((2, 0, 1))
 
@@ -393,6 +397,7 @@ if __name__=='__main__':
         # return rgb.float()
         return rgb.permute(1, 2, 0).contiguous()
     def get_rgb(image):
+    
         image = image.mul(0.5).add_(0.5)
         image = image.squeeze()
         image = image.mul(10000).add_(0.5).clamp_(0, 10000)
