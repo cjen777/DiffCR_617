@@ -138,6 +138,8 @@ class Network(BaseNetwork):
         #         y_t = y_0*(1.-mask) + mask*y_t
         #     if i % sample_inter == 0:
         #         ret_arr = torch.cat([ret_arr, y_t], dim=0)
+        criterion = torch.nn.MSELoss()
+        print(criterion(y_0, y_t))
         noise_schedule = NoiseScheduleVP(schedule='discrete', betas=torch.from_numpy(self.betas))
         model_fn = model_wrapper(
             self.denoise_fn,
@@ -157,12 +159,16 @@ class Network(BaseNetwork):
         )
         y_t = dpm_solver.sample(
             y_t,
-            steps=20, # 10, 12, 15, 20, 25, 50, 100
+            steps=100, # 10, 12, 15, 20, 25, 50, 100
             order=2,
             skip_type="time_uniform",
-            method="multistep",
+            method="singlestep",
             denoise_to_zero=True,
         )
+        print(y_0.shape, y_t.shape)
+        criterion = torch.nn.MSELoss()
+        print(criterion(y_0, y_t))
+        exit()
         return y_t, ret_arr
 
     def forward(self, y_0, y_cond=None, mask=None, noise=None):
@@ -182,8 +188,14 @@ class Network(BaseNetwork):
             noise_hat = self.denoise_fn(torch.cat([y_cond, y_noisy*mask+(1.-mask)*y_0], dim=1), sample_gammas)
             loss = self.loss_fn(mask*noise, mask*noise_hat)
         else:
-            y_0_hat = self.denoise_fn(torch.cat([y_cond, y_noisy], dim=1), sample_gammas)
+            # print(y_cond.shape, y_noisy.shape)
+            y_0_hat = self.denoise_fn(torch.cat([y_cond, y_noisy], dim=1), sample_gammas) #cjen
             loss = self.loss_fn(y_0, y_0_hat)
+            print(loss)
+        if loss.item() < 1e-1:
+            np.save(file='GT_good_example.npy', arr=y_0.detach().cpu())
+            np.save(file='Pred_good_example.npy', arr=y_0_hat.detach().cpu())
+            exit()
         return loss
 
 

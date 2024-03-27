@@ -66,13 +66,13 @@ class Sen2_MTC_New_Multi(data.Dataset):
 
             for image_name in image_name_list:
                 image_cloud_path0 = os.path.join(
-                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_0.tif')
+                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_0.npy')
                 image_cloud_path1 = os.path.join(
-                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_1.tif')
+                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_1.npy')
                 image_cloud_path2 = os.path.join(
-                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_2.tif')
+                    self.data_root, 'Sen2_MTC', tile, 'cloud', image_name + '_2.npy')
                 image_cloudless_path = os.path.join(
-                    self.data_root, 'Sen2_MTC', tile, 'cloudless', image_name + '.tif')
+                    self.data_root, 'Sen2_MTC', tile, 'cloudless', image_name + '.npy')
 
                 self.filepair.append(
                     [image_cloud_path0, image_cloud_path1, image_cloud_path2, image_cloudless_path])
@@ -89,14 +89,22 @@ class Sen2_MTC_New_Multi(data.Dataset):
             index][0], self.filepair[index][1], self.filepair[index][2]
         cloudless_image_path = self.filepair[index][3]
 
-        image_cloud0 = self.image_read(cloud_image_path0)
-        image_cloud1 = self.image_read(cloud_image_path1)
-        image_cloud2 = self.image_read(cloud_image_path2)
-        image_cloudless = self.image_read(cloudless_image_path)
-
+        # image_cloud0 = self.image_read(cloud_image_path0)
+        # image_cloud1 = self.image_read(cloud_image_path1)
+        # image_cloud2 = self.image_read(cloud_image_path2)
+        # image_cloudless = self.image_read(cloudless_image_path)
+        # print(cloud_image_path0, cloudless_image_path)
+        # exit()
+        image_cloud0 = torch.tensor(np.load(cloud_image_path0)[0])
+        image_cloud1 = torch.tensor(np.load(cloud_image_path1)[0])
+        image_cloud2 = torch.tensor(np.load(cloud_image_path2)[0])
+        image_cloudless = torch.tensor(np.load(cloudless_image_path)[0])
         # return [image_cloud0, image_cloud1, image_cloud2], image_cloudless, self.image_name[index]
-         
+        # print('Image shape:', image_cloud0.shape)
         ## MARKER : Gt Image / Cond Image should be latent vectors
+        criterion = torch.nn.MSELoss()
+        # print(criterion(image_cloud1, image_cloudless))  
+        # exit()
         ret = {}
         ret['gt_image'] = image_cloudless[:3, :, :]
         ret['cond_image'] = torch.cat([image_cloud0[:3, :, :], image_cloud1[:3, :, :], image_cloud2[:3, :, :]])
@@ -107,6 +115,7 @@ class Sen2_MTC_New_Multi(data.Dataset):
         return len(self.filepair)
 
     def image_read(self, image_path):
+        raise Exception
         img = tiff.imread(image_path)
         img = (img / 1.0).transpose((2, 0, 1))
 

@@ -3,6 +3,8 @@ import tqdm
 from core.base_model import BaseModel
 from core.logger import LogTracker
 import copy
+import torch.nn as nn
+
 class EMA():
     def __init__(self, beta=0.9999):
         super().__init__()
@@ -61,7 +63,8 @@ class Palette(BaseModel):
         self.cond_image = self.set_device(data.get('cond_image'))
         self.gt_image = self.set_device(data.get('gt_image'))
         ##TODO: Convert to latent
-
+        # print(self.cond_image.shape, self.gt_image.shape)
+        # exit()
         self.mask = self.set_device(data.get('mask'))
         self.mask_image = data.get('mask_image')
         self.path = data['path']
@@ -123,10 +126,10 @@ class Palette(BaseModel):
             # print(self.phase_loader) ## cjen
             # raise Exception
             self.set_input(train_data)
-            print(self.cond_image.shape)
-            print(self.gt_image.shape)
+            # print(self.cond_image.shape)
+            # print(self.gt_image.shape)
             
-            raise Exception
+            # raise Exception
             # print(self.mask, self.mask_image)
             # print(self.mask.shape, self.mask_image.shape)
             # raise Exception
@@ -190,6 +193,8 @@ class Palette(BaseModel):
         self.test_metrics.reset()
         with torch.no_grad():
             for phase_data in tqdm.tqdm(self.phase_loader):
+                print(phase_data)
+                # exit()
                 self.set_input(phase_data)
                 if self.opt['distributed']:
                     if self.task in ['inpainting','uncropping']:
@@ -198,12 +203,24 @@ class Palette(BaseModel):
                     else:
                         self.output, self.visuals = self.netG.module.restoration(self.cond_image, sample_num=self.sample_num, y_0=self.gt_image)
                 else:
+                    # print('here')
+                    # print(self.task)
+                    # exit()
+                    loss = self.netG(self.gt_image, self.cond_image, mask=self.mask)
+                    exit()
                     if self.task in ['inpainting','uncropping']:
                         self.output, self.visuals = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
                             y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                     else:
+                        x = self.cond_image[:, 3:6, :, :]
+                        criterion = nn.MSELoss()
+                        # print(criterion(x, self.gt_image))  
+                        # exit()
                         self.output, self.visuals = self.netG.restoration(self.cond_image, sample_num=self.sample_num, y_0=self.gt_image)
                         
+                # print(self.gt_image.shape, self.output.shape)
+                
+
                 self.iter += self.batch_size
                 self.writer.set_iter(self.epoch, self.iter, phase='test')
                 for met in self.metrics:

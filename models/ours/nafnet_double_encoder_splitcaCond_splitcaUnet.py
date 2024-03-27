@@ -373,6 +373,7 @@ class UNet(nn.Module):
         return x
 
     def check_image_size(self, x):
+        # print(x.size())
         _, _, h, w = x.size()
         mod_pad_h = (self.padder_size - h %
                      self.padder_size) % self.padder_size

@@ -4,8 +4,9 @@ import importlib
 from datetime import datetime
 import logging
 import pandas as pd
-
+import numpy as np
 import core.util as Util
+from torch import nn
 
 class InfoLogger():
     """
@@ -107,12 +108,19 @@ class VisualWriter():
         ''' get names and corresponding images from results[OrderedDict] '''
         try:
             names = results['name']
-            outputs = Util.postprocess(results['result'])
+            outputs = results['result']
+            criterion = nn.MSELoss()
+            # print(criterion(outputs[0], outputs[1]))
+            # exit()
+            # outputs = Util.postprocess(results['result'])
+            # print(outputs.shape)
+            # exit()
             for i in range(len(names)): 
                 if os.path.exists(os.path.join(result_path, names[i])):
                     pass
                 else:
-                    Image.fromarray(outputs[i]).save(os.path.join(result_path, names[i]))
+                    np.save(os.path.join(result_path, names[i].replace("png", "npy")), outputs[i])
+                    # Image.fromarray(outputs[i]).save(os.path.join(result_path, names[i]))
         except:
             raise NotImplementedError('You must specify the context of name and result in save_current_results functions of model.')
 

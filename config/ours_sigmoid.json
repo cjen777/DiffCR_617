@@ -11,7 +11,7 @@
         "tb_logger": "tb_logger",
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": "pretrained/diffcr_new.pth"
+        "resume_state": "pretrained/20"
     },
     "datasets": {
         "train": {
@@ -21,7 +21,7 @@
                     "Sen2_MTC_New_Multi"
                 ],
                 "args": {
-                    "data_root": "Sen2_MTC_New_Multi/dataset",
+                    "data_root": "Latent_MTC_New/dataset",
                     "mode": "train"
                 }
             },
@@ -47,7 +47,7 @@
             "which_dataset": {
                 "name": "Sen2_MTC_New_Multi",
                 "args": {
-                    "data_root": "Sen2_MTC_New_Multi/dataset",
+                    "data_root": "Latent_MTC_New/dataset",
                     "mode": "val"
                 }
             }
@@ -56,7 +56,7 @@
             "which_dataset": {
                 "name": "Sen2_MTC_New_Multi",
                 "args": {
-                    "data_root": "Sen2_MTC_New_Multi/dataset",
+                    "data_root": "Latent_MTC_New/dataset",
                     "mode": "test"
                 }
             },
@@ -85,7 +85,7 @@
                 },
                 "optimizers": [
                     {
-                        "lr": 5e-05,
+                        "lr": 1e-05,
                         "weight_decay": 0
                     }
                 ]
@@ -135,7 +135,7 @@
         "n_epoch": 3000,
         "n_iter": 100000000,
         "val_epoch": 1000,
-        "save_checkpoint_epoch": 1000,
+        "save_checkpoint_epoch": 10,
         "log_iter": 10000,
         "tensorboard": true
     },
